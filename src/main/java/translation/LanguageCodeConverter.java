@@ -4,14 +4,15 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 /**
- * This class provides the services of: <br/>
- * - converting language codes to their names <br/>
+ * This class provides the services of:
+ * - converting language codes to their names
  * - converting language names to their codes
  */
 public class LanguageCodeConverter {
@@ -33,52 +34,53 @@ public class LanguageCodeConverter {
      * @throws RuntimeException if the resources file can't be loaded properly
      */
     public LanguageCodeConverter(String filename) {
-
         try {
             List<String> lines = Files.readAllLines(Paths.get(getClass()
                     .getClassLoader().getResource(filename).toURI()));
 
             Iterator<String> iterator = lines.iterator();
-            iterator.next(); // skip the first line
+            iterator.next(); // skip header
             while (iterator.hasNext()) {
                 String line = iterator.next();
-                String[] parts = line.split("\\t");
+                String[] parts = line.split("\t");
                 if (parts.length >= 2) {
-                    String language = parts[0].trim();
+                    String languageName = parts[0].trim();
                     String code = parts[1].trim();
-                    languageCodeToLanguage.put(code, language);
-                    languageToLanguageCode.put(language, code);
+                    languageCodeToLanguage.put(code, languageName);
+                    languageToLanguageCode.put(languageName, code);
                 }
             }
-
         } catch (IOException | URISyntaxException ex) {
             throw new RuntimeException(ex);
         }
     }
-    // Done
-    /**
-     * Return the name of the language for the given language code.
-     * @param code the 2-letter language code
-     * @return the name of the language corresponding to the code
-     */
+
+    /** Return the name of the language for a given code. */
     public String fromLanguageCode(String code) {
         return languageCodeToLanguage.get(code);
-
     }
 
-    /**
-     * Return the code of the language for the given language name.
-     * @param language the name of the language
-     * @return the 2-letter code of the language
-     */
+    /** Return the code of the language for a given name. */
     public String fromLanguage(String language) {
         return languageToLanguageCode.get(language);
     }
 
-    /**
-     * Return how many languages are included in this language code converter.
-     * @return how many languages are included in this language code converter.
-     */
+    /** Return all language names (for use in GUI dropdown). */
+    public List<String> getAllLanguageNames() {
+        return new ArrayList<>(languageToLanguageCode.keySet());
+    }
+
+    /** Return the code for a given language name. */
+    public String getLanguageCode(String languageName) {
+        return languageToLanguageCode.get(languageName);
+    }
+
+    /** Return the name for a given language code. */
+    public String getLanguageName(String code) {
+        return languageCodeToLanguage.get(code);
+    }
+
+    /** Return how many languages are included. */
     public int getNumLanguages() {
         return languageCodeToLanguage.size();
     }
