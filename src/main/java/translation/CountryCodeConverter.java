@@ -4,18 +4,20 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 /**
- * This class provides the service of converting country codes to their names and back.
+ * This class provides the service of converting country codes (alpha-3, lowercase)
+ * to their names and back.
  */
 public class CountryCodeConverter {
 
-    private Map<String, String> countryCodeToCountry = new HashMap<>();
-    private Map<String, String> countryToCountryCode = new HashMap<>();
+    private final Map<String, String> countryCodeToCountry = new HashMap<>();
+    private final Map<String, String> countryToCountryCode = new HashMap<>();
 
     /**
      * Default constructor that loads the country codes from "country-codes.txt"
@@ -31,54 +33,54 @@ public class CountryCodeConverter {
      * @throws RuntimeException if the resources file can't be loaded properly
      */
     public CountryCodeConverter(String filename) {
-
         try {
             List<String> lines = Files.readAllLines(Paths.get(getClass()
                     .getClassLoader().getResource(filename).toURI()));
 
             Iterator<String> iterator = lines.iterator();
-            iterator.next(); // skip the first line
+            iterator.next(); // skip header
             while (iterator.hasNext()) {
                 String line = iterator.next();
                 String[] parts = line.split("\t");
 
-                String countryCode = parts[2].trim().toUpperCase();
                 String countryName = parts[0].trim();
+                String countryCode = parts[2].trim().toLowerCase(); // Alpha-3, lowercase
+
                 countryCodeToCountry.put(countryCode, countryName);
                 countryToCountryCode.put(countryName, countryCode);
-
             }
         }
         catch (IOException | URISyntaxException ex) {
             throw new RuntimeException(ex);
         }
-
     }
 
-    /**
-     * Return the name of the country for the given country code.
-     * @param code the 3-letter code of the country
-     * @return the name of the country corresponding to the code
-     */
+    /** Return the name of the country for the given alpha-3 code. */
     public String fromCountryCode(String code) {
-        String country = countryCodeToCountry.get(code.toUpperCase());
-        return country;
+        return countryCodeToCountry.get(code.toLowerCase());
     }
 
-    /**
-     * Return the code of the country for the given country name.
-     * @param country the name of the country
-     * @return the 3-letter code of the country
-     */
+    /** Return the alpha-3 code of the country for the given country name. */
     public String fromCountry(String country) {
-        String countryCode = countryToCountryCode.get(country);
-        return countryCode;
+        return countryToCountryCode.get(country);
     }
 
-    /**
-     * Return how many countries are included in this country code converter.
-     * @return how many countries are included in this country code converter.
-     */
+    /** Return all country names (for use in GUI list). */
+    public List<String> getAllCountryNames() {
+        return new ArrayList<>(countryToCountryCode.keySet());
+    }
+
+    /** Return the ISO alpha-3 code for a given country name. */
+    public String getCountryCode(String countryName) {
+        return countryToCountryCode.get(countryName);
+    }
+
+    /** Return the country name for a given ISO alpha-3 code. */
+    public String getCountryName(String countryCode) {
+        return countryCodeToCountry.get(countryCode.toLowerCase());
+    }
+
+    /** Return how many countries are included. */
     public int getNumCountries() {
         return countryCodeToCountry.size();
     }
